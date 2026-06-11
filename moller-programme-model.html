@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Møller Institute — Programme Financial Model</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --surface2: #f0efe9;
+    --border: rgba(0,0,0,0.10);
+    --border2: rgba(0,0,0,0.18);
+    --text: #1a1a18;
+    --text2: #6b6a64;
+    --text3: #9b9a94;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --green-dark: #085041;
+    --green-mid: #1D9E75;
+    --green-light: #5DCAA5;
+    --orange-dark: #BA7517;
+    --orange-mid: #EF9F27;
+    --orange-light: #FAC775;
+    --purple-dark: #3C3489;
+    --purple-mid: #534AB7;
+    --purple-light: #7F77DD;
+    --purple-pale: #AFA9EC;
+    --pink: #D4537E;
+    --moller-green: #1a5c3a;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #181816;
+      --surface: #222220;
+      --surface2: #2c2c29;
+      --border: rgba(255,255,255,0.10);
+      --border2: rgba(255,255,255,0.18);
+      --text: #f0efe9;
+      --text2: #a0a09a;
+      --text3: #6b6a64;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--moller-green);
+    color: #fff;
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  header h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+  header p  { font-size: 13px; opacity: 0.7; }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  section {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 1rem;
+  }
+
+  /* ── Pricing bands ── */
+  .band-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 90px;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .band-header span {
+    font-size: 11px;
+    color: var(--text2);
+  }
+  .band-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 90px;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .band-total {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    text-align: right;
+  }
+  .gross-bar {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 0.5px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .gross-bar span:first-child { font-size: 13px; color: var(--text2); }
+  .gross-bar span:last-child  { font-size: 18px; font-weight: 600; color: var(--text); }
+
+  /* ── Two-col grid ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 680px) { .two-col { grid-template-columns: 1fr; } }
+
+  .input-panel {
+    background: var(--surface2);
+    border-radius: var(--radius);
+    padding: 1rem;
+  }
+  .panel-title { font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 10px; }
+
+  /* ── Sliders ── */
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .slider-row label { font-size: 12px; color: var(--text2); min-width: 170px; flex-shrink: 0; }
+  .slider-row input[type=range] { flex: 1; accent-color: var(--purple-mid); }
+  .slider-val { font-size: 13px; font-weight: 600; min-width: 80px; text-align: right; color: var(--text); }
+
+  /* ── Number inputs ── */
+  .ig { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .igrp { display: flex; flex-direction: column; gap: 3px; }
+  .igrp label { font-size: 11px; color: var(--text2); }
+  input[type=number], input[type=text] {
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 13px;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border2);
+    background: var(--surface);
+    color: var(--text);
+    font-family: inherit;
+  }
+  input[type=number]:focus, input[type=text]:focus {
+    outline: 2px solid var(--purple-mid);
+    outline-offset: 1px;
+  }
+
+  /* ── Toggles / tabs ── */
+  .tabs {
+    display: flex;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  .tab {
+    flex: 1;
+    padding: 8px 0;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    background: var(--surface);
+    color: var(--text2);
+    border: none;
+    border-right: 0.5px solid var(--border2);
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  .tab:last-child { border-right: none; }
+  .tab.active { background: var(--surface2); color: var(--text); }
+  .tab:hover:not(.active) { background: var(--surface2); }
+
+  .tb-row { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .tb {
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border2);
+    background: var(--surface);
+    color: var(--text2);
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  .tb.active { background: var(--surface2); color: var(--text); border-color: var(--border2); }
+  .tb:hover:not(.active) { background: var(--surface2); }
+
+  .check-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 7px;
+    font-size: 13px;
+    color: var(--text2);
+  }
+  .check-row input[type=checkbox] {
+    width: 15px; height: 15px;
+    accent-color: var(--purple-mid);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* ── Summary cards ── */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 8px;
+  }
+  .card {
+    background: var(--surface2);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+  }
+  .card-label { font-size: 11px; color: var(--text2); margin-bottom: 3px; }
+  .card-value { font-size: 18px; font-weight: 700; color: var(--text); }
+  .card-sub   { font-size: 11px; color: var(--text2); margin-top: 3px; }
+
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 20px;
+  }
+  .pill-green  { background: #d6efdc; color: #1a5c1a; }
+  .pill-amber  { background: #fdebc8; color: #7a4a00; }
+  .pill-red    { background: #fde0e0; color: #8a1a1a; }
+
+  /* ── Table ── */
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th {
+    font-weight: 600;
+    color: var(--text2);
+    text-align: right;
+    padding: 5px 6px;
+    border-bottom: 0.5px solid var(--border);
+    font-size: 10px;
+    white-space: nowrap;
+  }
+  th:first-child { text-align: left; }
+  td {
+    padding: 5px 6px;
+    text-align: right;
+    border-bottom: 0.5px solid var(--border);
+    color: var(--text);
+    white-space: nowrap;
+  }
+  td:first-child { text-align: left; font-weight: 600; }
+  tr.hl td { background: var(--surface2); }
+  .col-gn { color: var(--green-dark); }
+  .col-am { color: var(--orange-dark); }
+  .col-pu { color: var(--purple-dark); }
+  .col-pk { color: var(--pink); }
+  .mg-gn  { color: #3B6D11; }
+  .mg-am  { color: #854F0B; }
+  .mg-rd  { color: #A32D2D; }
+
+  /* ── Chart ── */
+  .chart-wrap { position: relative; width: 100%; height: 300px; margin-top: 1.5rem; }
+  .legend {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--text2);
+    flex-wrap: wrap;
+  }
+  .legend span { display: flex; align-items: center; gap: 4px; }
+  .ld { width: 10px; height: 10px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+
+  .col-note { font-size: 10px; color: var(--text2); margin-bottom: 8px; }
+
+  /* ── Invoice ── */
+  .inv-s td { font-weight: 600; color: var(--text); padding: 7px 7px 2px; font-size: 12px; }
+  .inv-s td:first-child { padding-left: 7px; }
+  .inv-b td:first-child { color: var(--text2); font-weight: 400; padding-left: 18px; }
+  .inv-t td { font-weight: 700; border-top: 0.5px solid var(--border2); }
+  .inv-note { color: var(--text3) !important; font-size: 11px; }
+
+  hr { border: none; border-top: 0.5px solid var(--border); }
+
+  @media (max-width: 600px) {
+    main { padding: 1rem; }
+    header { padding: 1rem; }
+    .band-header, .band-row { grid-template-columns: 1fr 1fr 1fr 70px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Møller Institute — Programme Financial Model</h1>
+  <p>Chinese University Exchange Programme · 2-week residential</p>
+</header>
+
+<main>
+
+  <!-- ══════════════════════════════════════════
+       SECTION 1 · DATA INPUTS
+  ═══════════════════════════════════════════ -->
+  <section>
+    <p class="section-title">1 · Data inputs &amp; assumptions</p>
+
+    <!-- Pricing bands -->
+    <p class="panel-title" style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;">Delegate pricing bands</p>
+    <div class="band-header">
+      <span>Band label</span>
+      <span>Max students</span>
+      <span>Price/student (£)</span>
+      <span style="text-align:right;">Band income</span>
+    </div>
+    <div class="band-row">
+      <input type="text"   id="b1-label" value="Band 1 (students 1–20)">
+      <input type="number" id="b1-max"   value="20"   min="1" max="50">
+      <input type="number" id="b1-price" value="5100" min="0" step="50">
+      <span class="band-total" id="b1-total">—</span>
+    </div>
+    <div class="band-row">
+      <input type="text"   id="b2-label" value="Band 2 (students 21–30)">
+      <input type="number" id="b2-max"   value="30"   min="1" max="50">
+      <input type="number" id="b2-price" value="4900" min="0" step="50">
+      <span class="band-total" id="b2-total">—</span>
+    </div>
+    <div class="band-row">
+      <input type="text"   id="b3-label" value="Band 3 (students 31–50)">
+      <input type="number" id="b3-max"   value="50"   min="1" max="50">
+      <input type="number" id="b3-price" value="4700" min="0" step="50">
+      <span class="band-total" id="b3-total">—</span>
+    </div>
+    <div class="gross-bar">
+      <span>Total gross income (selected cohort)</span>
+      <span id="gross-display">—</span>
+    </div>
+
+    <hr style="margin:1.25rem 0;">
+
+    <!-- Teaching day tabs -->
+    <p class="panel-title" style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;">Teaching day scenario (per lead)</p>
+    <div class="tabs">
+      <button class="tab active" onclick="setDays(2,this)">2 days each</button>
+      <button class="tab" onclick="setDays(2.5,this)">2.5 days each</button>
+      <button class="tab" onclick="setDays(3,this)">3 days each</button>
+    </div>
+
+    <!-- Two col inputs -->
+    <div class="two-col">
+      <div class="input-panel">
+        <p class="panel-title">Cohort &amp; rates</p>
+        <div class="slider-row">
+          <label>Cohort size</label>
+          <input type="range" min="15" max="50" step="5" value="25" id="s-n">
+          <span class="slider-val" id="o-n">25 students</span>
+        </div>
+        <div class="slider-row">
+          <label>Day rate per person (£)</label>
+          <input type="range" min="1500" max="5000" step="250" id="s-dr" value="3500">
+          <span class="slider-val" id="o-dr">£3,500</span>
+        </div>
+        <div class="ig">
+          <div class="igrp">
+            <label>Venue (£/person/day · <span id="prog-days-label">10</span> prog days)</label>
+            <input type="number" id="i-venue" value="78" min="0" step="1">
+          </div>
+          <div class="igrp">
+            <label>Accommodation (£/person/night)</label>
+            <input type="number" id="i-accom" value="90" min="0" step="5">
+          </div>
+          <div class="igrp">
+            <label>Nights</label>
+            <input type="number" id="i-nights" value="12" min="1" step="1">
+          </div>
+          <div class="igrp">
+            <label>Speaker fee (£/session)</label>
+            <input type="number" id="i-glec" value="750" min="0" step="50">
+          </div>
+        </div>
+      </div>
+
+      <div class="input-panel">
+        <p class="panel-title">Toggles</p>
+
+        <p style="font-size:12px;color:var(--text2);margin-bottom:4px;">London travel</p>
+        <div class="tb-row">
+          <button class="tb active" id="tb-train" onclick="setTravel('train',this)">Train (groups of 4)</button>
+          <button class="tb" id="tb-coach" onclick="setTravel('coach',this)">Coach (£1,400 flat)</button>
+        </div>
+
+        <p style="font-size:12px;color:var(--text2);margin:8px 0 4px;">Formal dinner</p>
+        <div class="tb-row">
+          <button class="tb active" id="tb-ext" onclick="setDinner('external',this)">External (£110/head)</button>
+          <button class="tb" id="tb-col" onclick="setDinner('college',this)">College hosted</button>
+        </div>
+
+        <div style="margin-top:10px;">
+          <div class="check-row">
+            <input type="checkbox" id="cb-dux" checked>
+            <label for="cb-dux">Include Duxford trip</label>
+          </div>
+          <div class="check-row">
+            <input type="checkbox" id="cb-uber" checked>
+            <label for="cb-uber">Include Uber contingency (rain cover)</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SECTION 2 · PROGRAMME SUMMARY
+  ═══════════════════════════════════════════ -->
+  <section>
+    <p class="section-title">2 · Programme summary</p>
+    <div class="cards" id="sum-cards"></div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SECTION 3 · SCALING TABLE + GRAPH
+  ═══════════════════════════════════════════ -->
+  <section>
+    <p class="section-title">3 · Scaling with delegate number</p>
+    <p class="col-note">Green = college income · Orange = excursions, dinner, speakers · Purple = teaching fees · Pink = Møller net</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th rowspan="2" style="text-align:left;vertical-align:bottom;">Students</th>
+            <th rowspan="2" style="vertical-align:bottom;">Gross</th>
+            <th colspan="2" style="text-align:center;color:var(--green-dark);border-bottom:none;padding-bottom:1px;">College</th>
+            <th colspan="3" style="text-align:center;color:var(--orange-dark);border-bottom:none;padding-bottom:1px;">Excursions &amp; extras</th>
+            <th colspan="4" style="text-align:center;color:var(--purple-dark);border-bottom:none;padding-bottom:1px;">Core teaching</th>
+            <th rowspan="2" style="vertical-align:bottom;color:var(--pink);">Møller net</th>
+            <th rowspan="2" style="vertical-align:bottom;">Margin</th>
+          </tr>
+          <tr>
+            <th style="color:var(--green-dark);border-bottom:2px solid var(--green-dark);">Venue</th>
+            <th style="color:var(--green-dark);border-bottom:2px solid var(--green-light);">Accom</th>
+            <th style="color:var(--orange-dark);border-bottom:2px solid var(--orange-dark);">Dinner</th>
+            <th style="color:var(--orange-dark);border-bottom:2px solid var(--orange-mid);">Exc+travel</th>
+            <th style="color:var(--orange-dark);border-bottom:2px solid var(--orange-light);">Speakers</th>
+            <th style="color:var(--purple-dark);border-bottom:2px solid var(--purple-dark);">Finder</th>
+            <th style="color:var(--purple-dark);border-bottom:2px solid var(--purple-mid);">Lead 1</th>
+            <th style="color:var(--purple-dark);border-bottom:2px solid var(--purple-light);">Lead 2</th>
+            <th style="color:var(--purple-dark);border-bottom:2px solid var(--purple-pale);">Prep</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="chart-wrap">
+      <canvas id="chart" role="img" aria-label="Stacked bar chart of programme income split across cohort sizes"></canvas>
+    </div>
+    <div class="legend">
+      <span><span class="ld" style="background:var(--pink);"></span>Møller net</span>
+      <span><span class="ld" style="background:var(--purple-dark);"></span>Finder</span>
+      <span><span class="ld" style="background:var(--purple-mid);"></span>Lead 1 (you)</span>
+      <span><span class="ld" style="background:var(--purple-light);"></span>Lead 2</span>
+      <span><span class="ld" style="background:var(--purple-pale);"></span>Prep</span>
+      <span><span class="ld" style="background:var(--green-dark);"></span>Venue</span>
+      <span><span class="ld" style="background:var(--green-light);"></span>Accom</span>
+      <span><span class="ld" style="background:var(--orange-dark);"></span>Dinner</span>
+      <span><span class="ld" style="background:var(--orange-mid);"></span>Excursions+travel</span>
+      <span><span class="ld" style="background:var(--orange-light);"></span>Speakers</span>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SECTION 4 · INVOICE TO MØLLER
+  ═══════════════════════════════════════════ -->
+  <section>
+    <p class="section-title">4 · Invoice to Møller — itemised</p>
+    <div class="tbl-wrap">
+      <table id="inv-tbl"></table>
+    </div>
+  </section>
+
+</main>
+
+<script>
+const SIZES = [15,20,25,30,35,40,45,50];
+const PROG_DAYS = 10;
+let activeDays = 2, travelMode = 'train', dinnerMode = 'external';
+
+function fmt(n)  { return '£' + Math.round(n).toLocaleString('en-GB'); }
+function pct(n)  { return Math.round(n) + '%'; }
+function v(id)   { return parseFloat(document.getElementById(id).value) || 0; }
+function el(id)  { return document.getElementById(id); }
+
+function setDays(d, btn) {
+  activeDays = d;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+function setTravel(m, btn) {
+  travelMode = m;
+  document.querySelectorAll('#tb-train,#tb-coach').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+function setDinner(m, btn) {
+  dinnerMode = m;
+  document.querySelectorAll('#tb-ext,#tb-col').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function grossIncome(n) {
+  const b1max = Math.round(v('b1-max')),  b2max = Math.round(v('b2-max')),  b3max = Math.round(v('b3-max'));
+  const p1 = v('b1-price'), p2 = v('b2-price'), p3 = v('b3-price');
+  const t1 = Math.min(n, b1max) * p1;
+  const t2 = Math.max(0, Math.min(n, b2max) - b1max) * p2;
+  const t3 = Math.max(0, Math.min(n, b3max) - b2max) * p3;
+  return t1 + t2 + t3;
+}
+
+function prepFee(n) { return n >= 30 ? 8000 : 5000; }
+
+function calcB(n) {
+  const venueRate = v('i-venue') || 78;
+  const accomRate = v('i-accom') || 90;
+  const nights    = v('i-nights') || 12;
+  const glec      = v('i-glec') || 750;
+  const dux       = el('cb-dux').checked;
+  const uberOn    = el('cb-uber').checked;
+
+  const venue = venueRate * PROG_DAYS * n;
+  const accom = accomRate * nights * n;
+
+  let dinner;
+  if (dinnerMode === 'external') {
+    dinner = 110 * n + 110 * 5;
+  } else {
+    dinner = (67.92 * n) + 157.50 + (110 * 5);
+  }
+
+  const kings    = 16 * n;
+  const makespace = 250;
+  const duxCost  = dux ? (25 * n + 50 * Math.ceil(n / 4)) : 0;
+  const excursions = kings + makespace + duxCost;
+
+  const groups   = Math.ceil(n / 4);
+  const travel   = travelMode === 'train' ? 97.8 * groups : 1400;
+  const uberStn  = 30 * groups * 2;
+  const uberRain = uberOn ? 30 * groups * 2 : 0;
+  const excTravel = excursions + travel + uberStn + uberRain;
+
+  const speakers = 5 * glec; // 3 guest + tech english + moller skills
+
+  const subtotal    = venue + accom + dinner + excTravel + speakers;
+  const contingency = subtotal * 0.10;
+  const total       = Math.round(subtotal + contingency);
+
+  return { venue, accom, dinner, excursions, travel, uberStn, uberRain, excTravel, speakers, glec,
+           subtotal, contingency, total, venueRate, accomRate, nights, dux, uberOn, groups };
+}
+
+function computeN(n) {
+  const gross = grossIncome(n);
+  const dr    = v('s-dr') || 3500;
+  const days  = activeDays;
+  const b     = calcB(n);
+  const finder = Math.round(gross * 0.05);
+  const prep   = prepFee(n);
+  const lead1  = Math.round(days * dr);
+  const lead2  = Math.round(days * dr);
+  const totalFees = finder + prep + lead1 + lead2;
+  const mollerNet = gross - b.total - totalFees;
+  return { gross, b, finder, prep, lead1, lead2, totalFees, mollerNet, margin: (mollerNet / gross) * 100, dr, days };
+}
+
+function updateBandTotals(n) {
+  const b1max = Math.round(v('b1-max')), b2max = Math.round(v('b2-max')), b3max = Math.round(v('b3-max'));
+  const p1 = v('b1-price'), p2 = v('b2-price'), p3 = v('b3-price');
+  const t1 = Math.min(n, b1max) * p1;
+  const t2 = Math.max(0, Math.min(n, b2max) - b1max) * p2;
+  const t3 = Math.max(0, Math.min(n, b3max) - b2max) * p3;
+  el('b1-total').textContent = fmt(t1);
+  el('b2-total').textContent = t2 > 0 ? fmt(t2) : '—';
+  el('b3-total').textContent = t3 > 0 ? fmt(t3) : '—';
+  el('gross-display').textContent = fmt(t1 + t2 + t3);
+}
+
+let chart;
+
+function render() {
+  const n  = parseInt(el('s-n').value);
+  const dr = v('s-dr') || 3500;
+  el('o-n').textContent  = n + ' students';
+  el('o-dr').textContent = '£' + dr.toLocaleString('en-GB');
+  el('prog-days-label').textContent = PROG_DAYS;
+  updateBandTotals(n);
+
+  const d  = computeN(n);
+  const b  = d.b;
+  const g  = d.gross;
+  const glec = v('i-glec') || 750;
+
+  // ── Summary cards ──────────────────────────
+  const mc   = d.margin;
+  const pill = mc > 40 ? 'pill-green' : mc > 25 ? 'pill-amber' : 'pill-red';
+  const ml   = mc > 40 ? 'healthy'    : mc > 25 ? 'acceptable' : 'tight';
+  el('sum-cards').innerHTML = `
+    <div class="card"><p class="card-label">Gross income</p><p class="card-value">${fmt(g)}</p></div>
+    <div class="card"><p class="card-label">College venue + accom</p><p class="card-value">${fmt(b.venue + b.accom)}</p><p class="card-sub">paid to college</p></div>
+    <div class="card"><p class="card-label">All running costs</p><p class="card-value">${fmt(b.total)}</p><p class="card-sub">inc. 10% contingency</p></div>
+    <div class="card"><p class="card-label">Core teaching fees</p><p class="card-value">${fmt(d.totalFees)}</p><p class="card-sub">${Math.round(d.totalFees / g * 100)}% of gross</p></div>
+    <div class="card"><p class="card-label">Your personal take</p><p class="card-value">${fmt(d.finder + d.lead1 + d.prep)}</p><p class="card-sub">finder + lead 1 + prep</p></div>
+    <div class="card"><p class="card-label">Møller net</p><p class="card-value">${fmt(d.mollerNet)}</p><p class="card-sub"><span class="pill ${pill}">${pct(mc)} — ${ml}</span></p></div>
+  `;
+
+  // ── Scaling table ──────────────────────────
+  const tbody = el('tbody');
+  tbody.innerHTML = '';
+  const cMoller=[], cFinder=[], cL1=[], cL2=[], cPrep=[], cVenue=[], cAccom=[], cDinner=[], cExcTravel=[], cSpk=[];
+
+  SIZES.forEach(sz => {
+    const dd = computeN(sz);
+    const bb = dd.b;
+    cMoller.push(Math.max(0, Math.round(dd.mollerNet)));
+    cFinder.push(Math.round(dd.finder));
+    cL1.push(Math.round(dd.lead1));
+    cL2.push(Math.round(dd.lead2));
+    cPrep.push(Math.round(dd.prep));
+    cVenue.push(Math.round(bb.venue));
+    cAccom.push(Math.round(bb.accom));
+    cDinner.push(Math.round(bb.dinner));
+    cExcTravel.push(Math.round(bb.excTravel * 1.10));
+    cSpk.push(Math.round(bb.speakers * 1.10));
+
+    const mc2 = dd.margin;
+    const cls = mc2 > 40 ? 'mg-gn' : mc2 > 25 ? 'mg-am' : 'mg-rd';
+    const hl  = sz === n ? ' class="hl"' : '';
+    tbody.innerHTML += `<tr${hl}>
+      <td>${sz}</td>
+      <td>${fmt(dd.gross)}</td>
+      <td class="col-gn">${fmt(bb.venue)}</td>
+      <td class="col-gn">${fmt(bb.accom)}</td>
+      <td class="col-am">${fmt(bb.dinner)}</td>
+      <td class="col-am">${fmt(bb.excTravel)}</td>
+      <td class="col-am">${fmt(bb.speakers)}</td>
+      <td class="col-pu">${fmt(dd.finder)}</td>
+      <td class="col-pu">${fmt(dd.lead1)}</td>
+      <td class="col-pu">${fmt(dd.lead2)}</td>
+      <td class="col-pu">${fmt(dd.prep)}</td>
+      <td class="col-pk" style="font-weight:700;">${fmt(dd.mollerNet)}</td>
+      <td class="${cls}">${pct(mc2)}</td>
+    </tr>`;
+  });
+
+  // ── Chart ──────────────────────────────────
+  if (chart) chart.destroy();
+  chart = new Chart(el('chart'), {
+    type: 'bar',
+    data: {
+      labels: SIZES.map(s => s + ''),
+      datasets: [
+        { label: 'Møller net',        data: cMoller,    backgroundColor: '#D4537E', borderWidth: 0 },
+        { label: 'Finder',            data: cFinder,    backgroundColor: '#3C3489', borderWidth: 0 },
+        { label: 'Lead 1 (you)',      data: cL1,        backgroundColor: '#534AB7', borderWidth: 0 },
+        { label: 'Lead 2',            data: cL2,        backgroundColor: '#7F77DD', borderWidth: 0 },
+        { label: 'Prep',              data: cPrep,      backgroundColor: '#AFA9EC', borderWidth: 0 },
+        { label: 'Venue',             data: cVenue,     backgroundColor: '#085041', borderWidth: 0 },
+        { label: 'Accom',             data: cAccom,     backgroundColor: '#5DCAA5', borderWidth: 0 },
+        { label: 'Dinner',            data: cDinner,    backgroundColor: '#BA7517', borderWidth: 0 },
+        { label: 'Excursions+travel', data: cExcTravel, backgroundColor: '#EF9F27', borderWidth: 0 },
+        { label: 'Speakers',          data: cSpk,       backgroundColor: '#FAC775', borderWidth: 0 },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { stacked: true, ticks: { autoSkip: false } },
+        y: { stacked: true, ticks: { callback: v => '£' + (v / 1000).toFixed(0) + 'k' } }
+      }
+    }
+  });
+
+  // ── Invoice ────────────────────────────────
+  const dinnerNote  = dinnerMode === 'external'
+    ? `£110/head × ${n} delegates + 5 guests`
+    : `College hosted: £67.92/head × ${n} + £157.50 event fee + 5 external guests at £110`;
+  const travelNote  = travelMode === 'train'
+    ? `${b.groups} groups × £97.80 (inc. Travelcard)`
+    : 'Coach flat rate £1,400';
+
+  el('inv-tbl').innerHTML = `
+    <tr class="inv-s"><td colspan="3">Finder's fee</td></tr>
+    <tr class="inv-b"><td>5% of gross programme income (${fmt(g)})</td><td style="text-align:right;">${fmt(d.finder)}</td><td style="text-align:right;color:var(--text2);">${Math.round(d.finder / g * 100)}% of gross</td></tr>
+
+    <tr class="inv-s"><td colspan="3">Delivery — Lead 1 (Rachel)</td></tr>
+    <tr class="inv-b"><td>${d.days} days × £${dr.toLocaleString('en-GB')}/day (teaching &amp; project facilitation)</td><td style="text-align:right;">${fmt(d.lead1)}</td><td style="text-align:right;color:var(--text2);">${Math.round(d.lead1 / g * 100)}% of gross</td></tr>
+
+    <tr class="inv-s"><td colspan="3">Delivery — Lead 2 (Chinese lead)</td></tr>
+    <tr class="inv-b"><td>${d.days} days × £${dr.toLocaleString('en-GB')}/day (teaching &amp; project facilitation)</td><td style="text-align:right;">${fmt(d.lead2)}</td><td style="text-align:right;color:var(--text2);">${Math.round(d.lead2 / g * 100)}% of gross</td></tr>
+
+    <tr class="inv-s"><td colspan="3">Course preparation</td></tr>
+    <tr class="inv-b"><td>${n >= 30 ? 'Cohort 30+ rate' : 'Cohort under 30 rate'}</td><td style="text-align:right;">${fmt(d.prep)}</td><td style="text-align:right;color:var(--text2);">${Math.round(d.prep / g * 100)}% of gross</td></tr>
+
+    <tr class="inv-s"><td colspan="3">College costs</td></tr>
+    <tr class="inv-b"><td>Venue: £${b.venueRate}/person/day × ${PROG_DAYS} programme days × ${n} delegates</td><td style="text-align:right;">${fmt(b.venue)}</td><td></td></tr>
+    <tr class="inv-b"><td>Accommodation: £${b.accomRate}/night × ${b.nights} nights × ${n} delegates</td><td style="text-align:right;">${fmt(b.accom)}</td><td></td></tr>
+
+    <tr class="inv-s"><td colspan="3">Excursions &amp; extras</td></tr>
+    <tr class="inv-b"><td>Formal dinner (${dinnerNote})</td><td style="text-align:right;">${fmt(b.dinner)}</td><td></td></tr>
+    <tr class="inv-b"><td>Excursions — Kings College (£16/head), Makespace (£250 flat)${b.dux ? `, Duxford (£25/head + Uber)` : ''}</td><td style="text-align:right;">${fmt(b.excursions)}</td><td></td></tr>
+    <tr class="inv-b"><td>London day travel — ${travelNote}</td><td style="text-align:right;">${fmt(b.travel)}</td><td></td></tr>
+    <tr class="inv-b"><td>Uber to station — return, ${b.groups} groups of 4</td><td style="text-align:right;">${fmt(b.uberStn)}</td><td></td></tr>
+    ${b.uberOn ? `<tr class="inv-b"><td>Uber rain contingency — walking tour backup<span class="inv-note"> (conditional)</span></td><td style="text-align:right;">${fmt(b.uberRain)}</td><td style="text-align:right;color:var(--text3);">conditional</td></tr>` : ''}
+
+    <tr class="inv-s"><td colspan="3">Speakers</td></tr>
+    <tr class="inv-b"><td>Guest lecturers × 3 (£${glec.toLocaleString('en-GB')} per session)</td><td style="text-align:right;">${fmt(3 * glec)}</td><td></td></tr>
+    <tr class="inv-b"><td>Technical English speaker (£${glec.toLocaleString('en-GB')})</td><td style="text-align:right;">${fmt(glec)}</td><td></td></tr>
+    <tr class="inv-b"><td>Møller professional skills speaker (£${glec.toLocaleString('en-GB')})</td><td style="text-align:right;">${fmt(glec)}</td><td></td></tr>
+
+    <tr class="inv-b" style="border-top:0.5px solid var(--border);"><td style="padding-left:7px;color:var(--text2);">Subtotal before contingency</td><td style="text-align:right;color:var(--text2);">${fmt(b.subtotal)}</td><td></td></tr>
+    <tr class="inv-b"><td style="padding-left:7px;color:var(--text2);">10% contingency allowance</td><td style="text-align:right;color:var(--text2);">${fmt(b.contingency)}</td><td></td></tr>
+    <tr class="inv-t"><td>Total programme cost to Møller</td><td style="text-align:right;">${fmt(g - d.mollerNet)}</td><td style="text-align:right;color:var(--text2);">${Math.round((g - d.mollerNet) / g * 100)}% of gross</td></tr>
+  `;
+}
+
+// ── Event listeners ────────────────────────
+['s-n','s-dr','i-venue','i-accom','i-nights','i-glec',
+ 'b1-max','b1-price','b2-max','b2-price','b3-max','b3-price']
+  .forEach(id => { const e = el(id); if (e) e.addEventListener('input', render); });
+
+['b1-label','b2-label','b3-label']
+  .forEach(id => { const e = el(id); if (e) e.addEventListener('input', () => updateBandTotals(parseInt(el('s-n').value))); });
+
+el('cb-dux').addEventListener('change', render);
+el('cb-uber').addEventListener('change', render);
+
+render();
+</script>
+</body>
+</html>
