@@ -624,8 +624,7 @@ function render() {
 
   // ── Summary cards ──────────────────────────
   const mc   = d.margin;
-  const pill = mc > 40 ? 'pill-green' : mc > 25 ? 'pill-amber' : 'pill-red';
-  const ml   = mc > 40 ? 'healthy'    : mc > 25 ? 'acceptable' : 'tight';
+
   el('sum-cards').innerHTML = `
     <div class="card"><p class="card-label">Gross income</p><p class="card-value">${fmt(g)}</p></div>
     <div class="card"><p class="card-label">College venue + accom</p><p class="card-value">${fmt(b.venue + b.accom)}</p><p class="card-sub">paid to college</p></div>
