@@ -463,7 +463,7 @@
             <th style="color:var(--orange-dark);border-bottom:2px solid var(--orange-dark);">Dinner</th>
             <th style="color:var(--orange-dark);border-bottom:2px solid var(--orange-mid);">Exc+travel</th>
             <th style="color:var(--orange-dark);border-bottom:2px solid var(--orange-light);">Speakers</th>
-            <th style="color:var(--purple-dark);border-bottom:2px solid var(--purple-dark);">Finder</th>
+            <th style="color:var(--purple-dark);border-bottom:2px solid var(--purple-dark);">Finder/CORErecharge</th>
             <th style="color:var(--purple-dark);border-bottom:2px solid var(--purple-mid);">Lead 1</th>
             <th style="color:var(--purple-dark);border-bottom:2px solid var(--purple-light);">Lead 2</th>
             <th style="color:var(--purple-dark);border-bottom:2px solid var(--purple-pale);">Prep</th>
@@ -682,7 +682,7 @@ function render() {
       labels: SIZES.map(s => s + ''),
       datasets: [
         { label: 'Møller net',        data: cMoller,    backgroundColor: '#D4537E', borderWidth: 0 },
-        { label: 'Finder',            data: cFinder,    backgroundColor: '#3C3489', borderWidth: 0 },
+        { label: 'Finder/CORE recharge',            data: cFinder,    backgroundColor: '#3C3489', borderWidth: 0 },
         { label: 'Lead 1 (you)',      data: cL1,        backgroundColor: '#534AB7', borderWidth: 0 },
         { label: 'Lead 2',            data: cL2,        backgroundColor: '#7F77DD', borderWidth: 0 },
         { label: 'Prep',              data: cPrep,      backgroundColor: '#AFA9EC', borderWidth: 0 },
@@ -713,7 +713,7 @@ function render() {
     : 'Coach flat rate £1,400';
 
   el('inv-tbl').innerHTML = `
-    <tr class="inv-s"><td colspan="3">Finder's fee</td></tr>
+    <tr class="inv-s"><td colspan="3">Finder's fee/CORE recharge</td></tr>
     <tr class="inv-b"><td>5% of gross programme income (${fmt(g)})</td><td style="text-align:right;">${fmt(d.finder)}</td><td style="text-align:right;color:var(--text2);">${Math.round(d.finder / g * 100)}% of gross</td></tr>
 
     <tr class="inv-s"><td colspan="3">Delivery — Lead 1 (Rachel)</td></tr>
