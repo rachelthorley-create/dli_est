@@ -463,10 +463,10 @@
             <th style="color:var(--orange-dark);border-bottom:2px solid var(--orange-dark);">Dinner</th>
             <th style="color:var(--orange-dark);border-bottom:2px solid var(--orange-mid);">Exc+travel</th>
             <th style="color:var(--orange-dark);border-bottom:2px solid var(--orange-light);">Speakers</th>
-            <th style="color:var(--purple-dark);border-bottom:2px solid var(--purple-dark);">Finder/CORErecharge</th>
+            <th style="color:var(--purple-dark);border-bottom:2px solid var(--purple-dark);">Finder_CORErecharge</th>
             <th style="color:var(--purple-dark);border-bottom:2px solid var(--purple-mid);">Lead 1</th>
             <th style="color:var(--purple-dark);border-bottom:2px solid var(--purple-light);">Lead 2</th>
-            <th style="color:var(--purple-dark);border-bottom:2px solid var(--purple-pale);">Prep</th>
+            <th style="color:var(--purple-dark);border-bottom:2px solid var(--purple-pale);">Prep_split</th>
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
@@ -478,7 +478,7 @@
     </div>
     <div class="legend">
       <span><span class="ld" style="background:var(--pink);"></span>Møller net</span>
-      <span><span class="ld" style="background:var(--purple-dark);"></span>Finder</span>
+      <span><span class="ld" style="background:var(--purple-dark);"></span>Finder_CORErecharge</span>
       <span><span class="ld" style="background:var(--purple-mid);"></span>Lead 1 (you)</span>
       <span><span class="ld" style="background:var(--purple-light);"></span>Lead 2</span>
       <span><span class="ld" style="background:var(--purple-pale);"></span>Prep</span>
@@ -631,7 +631,6 @@ function render() {
     <div class="card"><p class="card-label">College venue + accom</p><p class="card-value">${fmt(b.venue + b.accom)}</p><p class="card-sub">paid to college</p></div>
     <div class="card"><p class="card-label">All running costs</p><p class="card-value">${fmt(b.total)}</p><p class="card-sub">inc. 10% contingency</p></div>
     <div class="card"><p class="card-label">Core teaching fees</p><p class="card-value">${fmt(d.totalFees)}</p><p class="card-sub">${Math.round(d.totalFees / g * 100)}% of gross</p></div>
-    <div class="card"><p class="card-label">Your personal take</p><p class="card-value">${fmt(d.finder + d.lead1 + d.prep)}</p><p class="card-sub">finder + lead 1 + prep</p></div>
     <div class="card"><p class="card-label">Møller net</p><p class="card-value">${fmt(d.mollerNet)}</p><p class="card-sub"><span class="pill ${pill}">${pct(mc)} — ${ml}</span></p></div>
   `;
 
@@ -682,7 +681,7 @@ function render() {
       labels: SIZES.map(s => s + ''),
       datasets: [
         { label: 'Møller net',        data: cMoller,    backgroundColor: '#D4537E', borderWidth: 0 },
-        { label: 'Finder/CORE recharge',            data: cFinder,    backgroundColor: '#3C3489', borderWidth: 0 },
+        { label: 'Finder_CORE recharge',            data: cFinder,    backgroundColor: '#3C3489', borderWidth: 0 },
         { label: 'Lead 1 (you)',      data: cL1,        backgroundColor: '#534AB7', borderWidth: 0 },
         { label: 'Lead 2',            data: cL2,        backgroundColor: '#7F77DD', borderWidth: 0 },
         { label: 'Prep',              data: cPrep,      backgroundColor: '#AFA9EC', borderWidth: 0 },
@@ -713,7 +712,7 @@ function render() {
     : 'Coach flat rate £1,400';
 
   el('inv-tbl').innerHTML = `
-    <tr class="inv-s"><td colspan="3">Finder's fee/CORE recharge</td></tr>
+    <tr class="inv-s"><td colspan="3">Finder's fee_CORE recharge</td></tr>
     <tr class="inv-b"><td>5% of gross programme income (${fmt(g)})</td><td style="text-align:right;">${fmt(d.finder)}</td><td style="text-align:right;color:var(--text2);">${Math.round(d.finder / g * 100)}% of gross</td></tr>
 
     <tr class="inv-s"><td colspan="3">Delivery — Lead 1 (Rachel)</td></tr>
